@@ -14,11 +14,7 @@ import '../../models/student.dart';
 import '../../providers/student_provider.dart';
 import '../../providers/assessment_provider.dart';
 import '../../models/user.dart';
-import '../../widgets/app_bar.dart';
-import '../../widgets/button.dart';
-import '../../widgets/card.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/dropdown.dart';
 import '../../widgets/chart_bar.dart';
 
 class LaporanScreen extends ConsumerStatefulWidget {
@@ -54,7 +50,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
 
     List<Student> students = studentState.students;
 
-    // UC-007: Orang Tua only sees their child
     if (isOrangTua) {
       final childId = authState.user?.childId;
       students = students.where((s) => s.id == childId).toList();
@@ -62,70 +57,162 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
     }
 
     return Scaffold(
-      appBar: const AppAppBar(
-        title: 'Laporan',
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(Spacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // UC-005 Main Flow: Step 2 - Select student
-            AppDropdown<String>(
-              label: 'Pilih Siswa',
-              value: _selectedStudentId,
-              hint: 'Pilih siswa',
-              items: students.map<DropdownMenuItem<String>>((s) {
-                return DropdownMenuItem(value: s.id, child: Text(s.name));
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedStudentId = value;
-                  _reportGenerated = false;
-                });
-              },
-              prefixIcon: const Icon(Icons.person_outlined, color: AppColors.grey),
+      backgroundColor: AppColors.background,
+      body: Column(
+        children: [
+          // Gradient Header
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFF97316), Color(0xFFF59E0B)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(24),
+              ),
             ),
-            const SizedBox(height: Spacing.lg),
-
-            // UC-005 Main Flow: Step 3 - Select semester
-            AppDropdown<String>(
-              label: 'Pilih Semester',
-              value: _selectedSemester,
-              hint: 'Pilih semester',
-              items: _semesters.map((s) {
-                return DropdownMenuItem(value: s, child: Text(s));
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedSemester = value;
-                  _reportGenerated = false;
-                });
-              },
-              prefixIcon: const Icon(Icons.calendar_today_outlined, color: AppColors.grey),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+                        onPressed: () => Navigator.maybePop(context),
+                      ),
+                      const Expanded(
+                        child: Text(
+                          'Laporan',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(width: 48),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Dropdowns row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _selectedStudentId,
+                              hint: const Text('Pilih Siswa', style: TextStyle(color: Colors.white70)),
+                              isExpanded: true,
+                              dropdownColor: AppColors.surface,
+                              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+                              items: students.map<DropdownMenuItem<String>>((s) {
+                                return DropdownMenuItem(value: s.id, child: Text(s.name));
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedStudentId = value;
+                                  _reportGenerated = false;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _selectedSemester,
+                              hint: const Text('Semester', style: TextStyle(color: Colors.white70)),
+                              isExpanded: true,
+                              dropdownColor: AppColors.surface,
+                              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+                              items: _semesters.map((s) {
+                                return DropdownMenuItem(value: s, child: Text(s));
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedSemester = value;
+                                  _reportGenerated = false;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  // Generate button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _isGenerating ? null : _generateLaporan,
+                      icon: _isGenerating
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(Icons.auto_awesome, color: Colors.white),
+                      label: Text(
+                        _isGenerating ? 'Generating...' : 'Generate Laporan',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.25),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: Spacing.xl),
-
-            // UC-005 Main Flow: Step 4 - Generate button
-            AppButton(
-              text: _isGenerating ? 'Generating...' : 'Generate Laporan',
-              onPressed: _isGenerating ? null : _generateLaporan,
-              isLoading: _isGenerating,
-              icon: Icons.description,
+          ),
+          // Report Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(Spacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Daftar Laporan', style: AppTypography.h5),
+                  const SizedBox(height: Spacing.md),
+                  _buildLaporanList(assessmentState, students),
+                ],
+              ),
             ),
-            const SizedBox(height: Spacing.xxl),
-
-            // Report Preview
-            Text('Daftar Laporan', style: AppTypography.h5),
-            const SizedBox(height: Spacing.md),
-            _buildLaporanList(assessmentState, students),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  // UC-005 Main Flow: Steps 4-7 - Generate report
   Future<void> _generateLaporan() async {
     if (_selectedStudentId == null || _selectedSemester == null) {
       _showErrorSnackBar('Pilih siswa dan semester terlebih dahulu');
@@ -134,7 +221,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
 
     setState(() => _isGenerating = true);
 
-    // Show loading
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -144,7 +230,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
     );
 
     try {
-      // Simulate system fetching data and creating report
       await Future.delayed(const Duration(seconds: 2));
 
       final assessmentState = ref.read(assessmentProvider);
@@ -153,13 +238,11 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
       }).toList();
 
       if (assessments.isEmpty) {
-        // UC-005 Alternative Flow: No assessments
         if (mounted) {
-          Navigator.pop(context); // Close loading
+          Navigator.pop(context);
           _showErrorSnackBar('Belum ada penilaian untuk siswa ini pada semester ini');
         }
       } else {
-        // Compute per-aspect averages
         final Map<String, List<int>> aspectScores = {};
         for (final a in assessments) {
           aspectScores[a.aspect] = [...(aspectScores[a.aspect] ?? []), a.score];
@@ -171,9 +254,8 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
         final overall = assessments.map((a) => a.score.toDouble()).reduce((a, b) => a + b) /
             assessments.length;
 
-        // UC-005 Main Flow: Step 7 - Preview displayed
         if (mounted) {
-          Navigator.pop(context); // Close loading
+          Navigator.pop(context);
           setState(() {
             _isGenerating = false;
             _reportGenerated = true;
@@ -185,20 +267,17 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
         }
       }
     } catch (e) {
-      // UC-005 Exception Flow: Generate failed
       if (mounted) {
-        Navigator.pop(context); // Close loading
+        Navigator.pop(context);
         _showErrorSnackBar('Gagal generate laporan: $e');
         setState(() => _isGenerating = false);
       }
     }
   }
 
-  // UC-005 Main Flow: Step 8 - Download PDF
   Future<void> _downloadPDF() async {
     if (_selectedStudentId == null || _selectedSemester == null) return;
 
-    // Show loading
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -223,7 +302,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
         ),
       );
 
-      // Compute per-aspect averages
       final Map<String, List<int>> aspectScores = {};
       for (final a in assessments) {
         aspectScores[a.aspect] = [...(aspectScores[a.aspect] ?? []), a.score];
@@ -235,7 +313,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
           ? assessments.map((a) => a.score.toDouble()).reduce((a, b) => a + b) / assessments.length
           : 0.0;
 
-      // Generate PDF
       final pdf = pw.Document();
       final now = DateFormat('dd MMMM yyyy', 'id_ID').format(DateTime.now());
 
@@ -244,7 +321,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
           pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.all(40),
           build: (context) => [
-            // Header
             pw.Center(
               child: pw.Text(
                 'TK ISLAM SAFA',
@@ -278,7 +354,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
             ),
             pw.Divider(height: 20, color: PdfColor.fromHex('#16A34A')),
 
-            // Student Info
             pw.Text('DATA SISWA', style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 8),
             _buildPdfInfoRow('Nama Siswa', student.name),
@@ -289,14 +364,12 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
             _buildPdfInfoRow('No. HP Orang Tua', student.parentPhone),
             pw.SizedBox(height: 16),
 
-            // Summary
             pw.Text('RINGKASAN PENILAIAN', style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 8),
             _buildPdfInfoRow('Total Penilaian', '${assessments.length}'),
             _buildPdfInfoRow('Rata-rata Nilai', overall.toStringAsFixed(1)),
             pw.SizedBox(height: 16),
 
-            // Per-Aspect Averages
             pw.Text('DETAIL NILAI PER ASPEK', style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 8),
             pw.Table(
@@ -323,7 +396,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
             ),
             pw.SizedBox(height: 16),
 
-            // Detailed Assessments
             pw.Text('DETAIL PENILAIAN', style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 8),
             ...assessments.map((a) {
@@ -355,7 +427,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
 
             pw.SizedBox(height: 24),
 
-            // Signature
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
@@ -393,7 +464,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
         ),
       );
 
-      // Save PDF
       final bytes = await pdf.save();
       final dir = await getApplicationDocumentsDirectory();
       final fileName = 'Laporan_${student.name}_$_selectedSemester'.replaceAll(' ', '_');
@@ -401,12 +471,12 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
       await file.writeAsBytes(bytes);
 
       if (mounted) {
-        Navigator.pop(context); // Close loading
+        Navigator.pop(context);
         _showSuccessSnackBar('PDF berhasil disimpan: ${file.path}');
       }
     } catch (e) {
       if (mounted) {
-        Navigator.pop(context); // Close loading
+        Navigator.pop(context);
         _showErrorSnackBar('PDF gagal dibuat: $e');
       }
     }
@@ -467,7 +537,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
     }).toList();
 
     if (assessments.isEmpty) {
-      // UC-005 Alternative Flow: No assessments
       return const AppEmptyState(
         message: 'Belum ada penilaian',
         description: 'Untuk siswa ini pada semester ini',
@@ -489,7 +558,6 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
     final displayAspectAverages = _reportGenerated ? _aspectAverages : <String, double>{};
 
     if (!_reportGenerated) {
-      // Compute on-the-fly for live preview before generation
       final Map<String, List<int>> aspectScores = {};
       for (final a in assessments) {
         aspectScores[a.aspect] = [...(aspectScores[a.aspect] ?? []), a.score];
@@ -506,12 +574,7 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
           const SizedBox(height: Spacing.lg),
           _buildAspectCard(liveAverages),
           const SizedBox(height: Spacing.lg),
-          AppButton(
-            text: 'Download PDF',
-            onPressed: null,
-            isSecondary: true,
-            icon: Icons.download,
-          ),
+          _buildDownloadButton(false),
         ],
       );
     }
@@ -522,18 +585,83 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
         const SizedBox(height: Spacing.lg),
         _buildAspectCard(displayAspectAverages),
         const SizedBox(height: Spacing.lg),
-        AppButton(
-          text: 'Download PDF',
-          onPressed: _reportGenerated ? _downloadPDF : null,
-          isSecondary: true,
-          icon: Icons.download,
-        ),
+        _buildDownloadButton(true),
       ],
     );
   }
 
+  Widget _buildDownloadButton(bool enabled) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: enabled
+            ? const LinearGradient(
+                colors: [Color(0xFFF97316), Color(0xFFF59E0B)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: enabled ? null : AppColors.greyLight,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: enabled
+            ? [
+                BoxShadow(
+                  color: AppColors.orange.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ]
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: enabled ? _downloadPDF : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.download,
+                  color: enabled ? Colors.white : AppColors.grey,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Download PDF',
+                  style: TextStyle(
+                    color: enabled ? Colors.white : AppColors.grey,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildStudentCard(Student student, double averageScore, int count) {
-    return AppCard(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.orange.withValues(alpha: 0.12),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.orange.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -542,18 +670,17 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
             children: [
               Text(student.name, style: AppTypography.h5),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.sm,
-                  vertical: Spacing.xs,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  gradient: AppColors.orangeGradient,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   _selectedSemester!,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.primary,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -562,14 +689,26 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
           const SizedBox(height: Spacing.lg),
           Row(
             children: [
-              _StatItem(
-                label: 'Total Penilaian',
-                value: '$count',
+              Expanded(
+                child: _StatItem(
+                  label: 'Total Penilaian',
+                  value: '$count',
+                  color: AppColors.schoolBlue,
+                  icon: Icons.analytics_outlined,
+                ),
               ),
-              const SizedBox(width: Spacing.xxl),
-              _StatItem(
-                label: 'Rata-rata Nilai',
-                value: averageScore.toStringAsFixed(1),
+              Container(
+                width: 1,
+                height: 40,
+                color: AppColors.border,
+              ),
+              Expanded(
+                child: _StatItem(
+                  label: 'Rata-rata Nilai',
+                  value: averageScore.toStringAsFixed(1),
+                  color: AppColors.orange,
+                  icon: Icons.trending_up,
+                ),
               ),
             ],
           ),
@@ -579,11 +718,40 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
   }
 
   Widget _buildAspectCard(Map<String, double> aspectAverages) {
-    return AppCard(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.schoolYellow.withValues(alpha: 0.12),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.schoolYellow.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Detail Penilaian Per Aspek', style: AppTypography.h5),
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 20,
+                decoration: BoxDecoration(
+                  gradient: AppColors.yellowGradient,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text('Detail Penilaian Per Aspek', style: AppTypography.h5),
+            ],
+          ),
           const SizedBox(height: Spacing.lg),
           ...aspectAverages.entries.map((entry) {
             return Padding(
@@ -663,15 +831,35 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
 class _StatItem extends StatelessWidget {
   final String label;
   final String value;
+  final Color color;
+  final IconData icon;
 
-  const _StatItem({required this.label, required this.value});
+  const _StatItem({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(value, style: AppTypography.h4.copyWith(color: AppColors.primary)),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: AppTypography.h4.copyWith(color: color),
+        ),
+        const SizedBox(height: 2),
         Text(label, style: AppTypography.caption),
       ],
     );

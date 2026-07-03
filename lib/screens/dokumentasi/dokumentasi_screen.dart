@@ -11,11 +11,8 @@ import '../../providers/student_provider.dart';
 import '../../providers/documentation_provider.dart';
 import '../../models/documentation.dart';
 import '../../models/user.dart';
-import '../../widgets/app_bar.dart';
-import '../../widgets/card.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/button.dart';
-import '../../widgets/filter_chip.dart';
 import '../../widgets/dialog.dart';
 
 class DokumentasiScreen extends ConsumerStatefulWidget {
@@ -27,6 +24,16 @@ class DokumentasiScreen extends ConsumerStatefulWidget {
 
 class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
   String _selectedStudentId = '';
+
+  final List<Color> _cardColors = [
+    AppColors.schoolBlue,
+    AppColors.schoolPink,
+    AppColors.primary,
+    AppColors.purple,
+    AppColors.teal,
+    AppColors.orange,
+    AppColors.schoolYellow,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -42,42 +49,78 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
     }
 
     return Scaffold(
-      appBar: AppAppBar(
-        title: 'Dokumentasi',
-        actions: [
-          if (isGuru)
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () => _showUploadDialog(context),
-            ),
-        ],
-      ),
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(Spacing.lg),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+          // Gradient Header
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFE91E8C), Color(0xFFC2185B)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(24),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AppFilterChip(
-                    label: 'Semua',
-                    isSelected: _selectedStudentId.isEmpty,
-                    onTap: () => setState(() => _selectedStudentId = ''),
-                  ),
-                  const SizedBox(width: Spacing.sm),
-                  ...studentState.students.map((s) => Padding(
-                        padding: const EdgeInsets.only(right: Spacing.sm),
-                        child: AppFilterChip(
-                          label: s.name,
-                          isSelected: _selectedStudentId == s.id,
-                          onTap: () => setState(() => _selectedStudentId = s.id),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+                        onPressed: () => Navigator.maybePop(context),
+                      ),
+                      const Expanded(
+                        child: Text(
+                          'Dokumentasi',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                      )),
+                      ),
+                      if (isGuru)
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 24),
+                          onPressed: () => _showUploadDialog(context),
+                        )
+                      else
+                        const SizedBox(width: 48),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Filter chips
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildFilterChip('Semua', _selectedStudentId.isEmpty, () {
+                          setState(() => _selectedStudentId = '');
+                        }),
+                        const SizedBox(width: 8),
+                        ...studentState.students.map((s) => Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: _buildFilterChip(s.name, _selectedStudentId == s.id, () {
+                                setState(() => _selectedStudentId = s.id);
+                              }),
+                            )),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
+          // Documentation Grid
           Expanded(
             child: docs.isEmpty
                 ? const AppEmptyState(
@@ -87,7 +130,7 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
                     buttonText: 'Upload Dokumentasi',
                   )
                 : GridView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: Spacing.lg),
+                    padding: const EdgeInsets.all(Spacing.lg),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: Spacing.md,
@@ -96,34 +139,62 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
                     itemCount: docs.length,
                     itemBuilder: (context, index) {
                       final doc = docs[index];
-                      return AppCard(
-                        padding: EdgeInsets.zero,
+                      final color = _cardColors[index % _cardColors.length];
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: color.withValues(alpha: 0.12),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: color.withValues(alpha: 0.08),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // UC-004 Main Flow: Step 6 - Preview displayed
                             Expanded(
                               child: Container(
                                 width: double.infinity,
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  gradient: LinearGradient(
+                                    colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
                                   borderRadius: const BorderRadius.vertical(
                                     top: Radius.circular(16),
                                   ),
                                 ),
-                                child: const Icon(
-                                  Icons.photo,
-                                  size: 48,
-                                  color: AppColors.primary,
+                                child: Center(
+                                  child: Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [color, color.withValues(alpha: 0.7)],
+                                      ),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.photo,
+                                      size: 28,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(Spacing.sm),
+                              padding: const EdgeInsets.all(10),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // UC-004 Main Flow: Step 10 - Photo shows in gallery
                                   Text(
                                     doc.studentName,
                                     style: AppTypography.bodySmall.copyWith(
@@ -132,7 +203,7 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(height: Spacing.xs),
+                                  const SizedBox(height: 4),
                                   Text(
                                     doc.description,
                                     style: AppTypography.caption,
@@ -140,16 +211,22 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   if (isGuru) ...[
-                                    const SizedBox(height: Spacing.sm),
+                                    const SizedBox(height: 6),
                                     Align(
                                       alignment: Alignment.centerRight,
                                       child: GestureDetector(
-                                        // UC-004 Acceptance Criteria: Photo can be deleted
                                         onTap: () => _showDeleteDialog(context, doc),
-                                        child: const Icon(
-                                          Icons.delete_outline,
-                                          size: 18,
-                                          color: AppColors.error,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.error.withValues(alpha: 0.1),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: const Icon(
+                                            Icons.delete_outline,
+                                            size: 14,
+                                            color: AppColors.error,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -168,13 +245,35 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
       floatingActionButton: isGuru
           ? FloatingActionButton(
               onPressed: () => _showUploadDialog(context),
-              child: const Icon(Icons.add),
+              backgroundColor: AppColors.schoolPink,
+              child: const Icon(Icons.add, color: Colors.white),
             )
           : null,
     );
   }
 
-  // UC-004 Main Flow: Step 3 - Add Photo button pressed
+  Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? AppColors.schoolPink : Colors.white,
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showUploadDialog(BuildContext context) {
     final students = ref.read(studentProvider).students;
     String? selectedStudentId;
@@ -212,8 +311,6 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
               const SizedBox(height: Spacing.lg),
               Text('Upload Dokumentasi', style: AppTypography.h5),
               const SizedBox(height: Spacing.xl),
-
-              // UC-004 Main Flow: Step 2 - Select student
               DropdownButtonFormField<String>(
                 initialValue: selectedStudentId,
                 decoration: const InputDecoration(
@@ -225,8 +322,6 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
                 onChanged: (value) => setModalState(() => selectedStudentId = value),
               ),
               const SizedBox(height: Spacing.lg),
-
-              // UC-004 Main Flow: Step 7 - Add description
               TextField(
                 controller: descriptionController,
                 decoration: const InputDecoration(
@@ -236,11 +331,8 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
                 maxLines: 2,
               ),
               const SizedBox(height: Spacing.xl),
-
-              // UC-004 Main Flow: Step 4 & Alternative Flow
               Row(
                 children: [
-                  // UC-004 Main Flow: Step 4 - Camera opens
                   Expanded(
                     child: AppButton(
                       text: 'Kamera',
@@ -253,7 +345,6 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
                     ),
                   ),
                   const SizedBox(width: Spacing.md),
-                  // UC-004 Alternative Flow: Select from gallery
                   Expanded(
                     child: AppButton(
                       text: 'Galeri',
@@ -273,21 +364,14 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
     );
   }
 
-  // UC-004 Main Flow: Steps 4-5 - Camera flow
   Future<void> _handleCameraUpload(String? studentId, String description) async {
-    // UC-004 Exception Flow: Camera denied
-    // In prototype, we simulate the upload
     _saveDocumentation(studentId, description, 'camera');
   }
 
-  // UC-004 Alternative Flow: Gallery flow
   Future<void> _handleGalleryUpload(String? studentId, String description) async {
-    // UC-004 Exception Flow: Photo too large / Unsupported format
-    // In prototype, we simulate the upload
     _saveDocumentation(studentId, description, 'gallery');
   }
 
-  // UC-004 Main Flow: Steps 8-9 - Save
   Future<void> _saveDocumentation(String? studentId, String description, String source) async {
     if (studentId == null) {
       _showErrorSnackBar('Pilih siswa terlebih dahulu');
@@ -299,7 +383,6 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
       return;
     }
 
-    // Show loading
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -309,7 +392,6 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
     );
 
     try {
-      // Simulate upload delay
       await Future.delayed(const Duration(seconds: 1));
 
       final students = ref.read(studentProvider).students;
@@ -335,18 +417,17 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
       await ref.read(documentationProvider.notifier).addDocumentation(doc);
 
       if (mounted) {
-        Navigator.pop(context); // Close loading
+        Navigator.pop(context);
         _showSuccessSnackBar('Dokumentasi berhasil ditambahkan');
       }
     } catch (e) {
       if (mounted) {
-        Navigator.pop(context); // Close loading
+        Navigator.pop(context);
         _showErrorSnackBar('Gagal mengunggah foto: $e');
       }
     }
   }
 
-  // UC-004 Acceptance Criteria: Photo can be deleted
   void _showDeleteDialog(BuildContext context, Documentation doc) {
     AppDialog.show(
       context: context,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../config/colors.dart';
 import '../config/typography.dart';
 import '../config/spacing.dart';
-import 'card.dart';
 
 class AppStatCard extends StatelessWidget {
   final IconData icon;
@@ -19,35 +19,64 @@ class AppStatCard extends StatelessWidget {
     this.onTap,
   });
 
+  LinearGradient _getGradient() {
+    if (color == AppColors.primary) return AppColors.primaryGradient;
+    if (color == AppColors.info) return AppColors.blueGradient;
+    if (color == AppColors.secondary) return AppColors.tealGradient;
+    if (color == AppColors.schoolPink) return AppColors.pinkGradient;
+    if (color == AppColors.warning) return AppColors.yellowGradient;
+    return LinearGradient(
+      colors: [color, color.withValues(alpha: 0.8)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AppCard(
+    final gradient = _getGradient();
+    return GestureDetector(
       onTap: onTap,
-      padding: const EdgeInsets.all(Spacing.lg),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(Spacing.lg),
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: Spacing.sm),
-          Text(
-            value,
-            style: AppTypography.h3.copyWith(color: color),
-          ),
-          const SizedBox(height: Spacing.xs),
-          Text(
-            label,
-            style: AppTypography.caption,
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.25),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: Colors.white, size: 26),
+            ),
+            const SizedBox(height: Spacing.sm),
+            Text(
+              value,
+              style: AppTypography.h3.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: Spacing.xs),
+            Text(
+              label,
+              style: AppTypography.caption.copyWith(
+                color: Colors.white.withValues(alpha: 0.9),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
