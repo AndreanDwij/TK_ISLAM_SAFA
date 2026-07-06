@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/colors.dart';
 import '../../config/typography.dart';
-import '../../config/spacing.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/school_logo.dart';
 

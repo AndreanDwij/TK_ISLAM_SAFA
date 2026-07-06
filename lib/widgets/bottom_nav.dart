@@ -70,6 +70,11 @@ class BottomNavBar extends StatelessWidget {
           label: 'Penilaian',
         ),
         BottomNavigationBarItem(
+          icon: Icon(Icons.photo_library_outlined),
+          activeIcon: Icon(Icons.photo_library),
+          label: 'Dokumentasi',
+        ),
+        BottomNavigationBarItem(
           icon: Icon(Icons.description_outlined),
           activeIcon: Icon(Icons.description),
           label: 'Laporan',

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/documentation.dart';
-import '../utils/storage.dart';
+import '../services/supabase_service.dart';
 
 class DocumentationState {
   final List<Documentation> documentations;
@@ -32,21 +32,32 @@ class DocumentationNotifier extends StateNotifier<DocumentationState> {
   }
 
   Future<void> loadDocumentation() async {
-    state = state.copyWith(isLoading: true);
-    final documentation = await StorageService.getDocumentation();
-    state = DocumentationState(documentations: documentation);
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final documentation = await SupabaseService.getDocumentation();
+      state = DocumentationState(documentations: documentation);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: 'Gagal memuat dokumentasi');
+    }
   }
 
   Future<void> addDocumentation(Documentation doc) async {
-    final updated = [...state.documentations, doc];
-    await StorageService.saveDocumentation(updated);
-    state = state.copyWith(documentations: updated);
+    try {
+      final newDoc = await SupabaseService.addDocumentation(doc);
+      state = state.copyWith(documentations: [newDoc, ...state.documentations]);
+    } catch (e) {
+      state = state.copyWith(error: 'Gagal menambah dokumentasi');
+    }
   }
 
   Future<void> deleteDocumentation(String id) async {
-    final updated = state.documentations.where((d) => d.id != id).toList();
-    await StorageService.saveDocumentation(updated);
-    state = state.copyWith(documentations: updated);
+    try {
+      await SupabaseService.deleteDocumentation(id);
+      final updated = state.documentations.where((d) => d.id != id).toList();
+      state = state.copyWith(documentations: updated);
+    } catch (e) {
+      state = state.copyWith(error: 'Gagal menghapus dokumentasi');
+    }
   }
 
   List<Documentation> getByStudent(String studentId) {

@@ -29,6 +29,7 @@ class AppDialog {
             isSecondary: true,
             size: AppButtonSize.small,
           ),
+          const SizedBox(width: 12),
           AppButton(
             text: confirmText,
             onPressed: () {

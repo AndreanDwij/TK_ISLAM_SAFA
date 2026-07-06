@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import '../../config/colors.dart';
 import '../../config/typography.dart';
@@ -14,6 +16,7 @@ import '../../models/user.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/button.dart';
 import '../../widgets/dialog.dart';
+import '../../services/supabase_service.dart';
 
 class DokumentasiScreen extends ConsumerStatefulWidget {
   const DokumentasiScreen({super.key});
@@ -159,35 +162,40 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(16),
-                                  ),
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(16),
                                 ),
-                                child: Center(
-                                  child: Container(
-                                    width: 56,
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [color, color.withValues(alpha: 0.7)],
+                                child: doc.photoUrl.startsWith('http')
+                                    ? Image.network(
+                                        doc.photoUrl,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => Container(
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Icon(Icons.broken_image, size: 28, color: color),
+                                          ),
+                                        ),
+                                      )
+                                    : Container(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                        ),
+                                        child: const Center(
+                                          child: Icon(Icons.photo, size: 28, color: Colors.grey),
+                                        ),
                                       ),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: const Icon(
-                                      Icons.photo,
-                                      size: 28,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
                               ),
                             ),
                             Padding(
@@ -365,14 +373,32 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
   }
 
   Future<void> _handleCameraUpload(String? studentId, String description) async {
-    _saveDocumentation(studentId, description, 'camera');
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 80,
+    );
+    if (pickedFile != null) {
+      _saveDocumentation(studentId, description, File(pickedFile.path));
+    }
   }
 
   Future<void> _handleGalleryUpload(String? studentId, String description) async {
-    _saveDocumentation(studentId, description, 'gallery');
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 80,
+    );
+    if (pickedFile != null) {
+      _saveDocumentation(studentId, description, File(pickedFile.path));
+    }
   }
 
-  Future<void> _saveDocumentation(String? studentId, String description, String source) async {
+  Future<void> _saveDocumentation(String? studentId, String description, File imageFile) async {
     if (studentId == null) {
       _showErrorSnackBar('Pilih siswa terlebih dahulu');
       return;
@@ -392,7 +418,13 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
     );
 
     try {
-      await Future.delayed(const Duration(seconds: 1));
+      final fileId = const Uuid().v4();
+      final ext = imageFile.path.split('.').last;
+      final photoUrl = await SupabaseService.uploadPhoto(
+        bucket: 'photos',
+        path: 'documentation/$fileId.$ext',
+        file: imageFile,
+      );
 
       final students = ref.read(studentProvider).students;
       final student = students.firstWhere(
@@ -408,7 +440,7 @@ class _DokumentasiScreenState extends ConsumerState<DokumentasiScreen> {
         id: const Uuid().v4(),
         studentId: studentId,
         studentName: student.name,
-        photoUrl: 'https://via.placeholder.com/300',
+        photoUrl: photoUrl,
         description: description,
         date: DateTime.now(),
         createdAt: DateTime.now(),
