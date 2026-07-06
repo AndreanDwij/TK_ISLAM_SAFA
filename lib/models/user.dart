@@ -45,6 +45,28 @@ class User {
     );
   }
 
+  factory User.fromSupabase(Map<String, dynamic> map) {
+    return User(
+      id: map['id'],
+      name: map['name'] ?? '',
+      email: map['email'] ?? '',
+      password: '',
+      role: UserRole.values[map['role'] ?? 0],
+      photoUrl: map['photo_url'],
+      childId: map['child_id'],
+    );
+  }
+
+  Map<String, dynamic> toSupabase() {
+    return {
+      'name': name,
+      'email': email,
+      'role': role.index,
+      'photo_url': photoUrl,
+      'child_id': childId,
+    };
+  }
+
   String toJson() => json.encode(toMap());
 
   factory User.fromJson(String source) => User.fromMap(json.decode(source));

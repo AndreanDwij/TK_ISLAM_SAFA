@@ -57,6 +57,34 @@ class Student {
     );
   }
 
+  factory Student.fromSupabase(Map<String, dynamic> map) {
+    return Student(
+      id: map['id'],
+      nis: map['nis'],
+      name: map['name'],
+      gender: map['gender'],
+      birthDate: DateTime.parse(map['birth_date']),
+      className: map['class_name'],
+      parentName: map['parent_name'],
+      parentPhone: map['parent_phone'],
+      photoUrl: map['photo_url'],
+      createdAt: DateTime.parse(map['created_at']),
+    );
+  }
+
+  Map<String, dynamic> toSupabase() {
+    return {
+      'nis': nis,
+      'name': name,
+      'gender': gender,
+      'birth_date': birthDate.toIso8601String().split('T')[0],
+      'class_name': className,
+      'parent_name': parentName,
+      'parent_phone': parentPhone,
+      'photo_url': photoUrl,
+    };
+  }
+
   String toJson() => json.encode(toMap());
 
   factory Student.fromJson(String source) => Student.fromMap(json.decode(source));

@@ -43,6 +43,28 @@ class Documentation {
     );
   }
 
+  factory Documentation.fromSupabase(Map<String, dynamic> map) {
+    return Documentation(
+      id: map['id'],
+      studentId: map['student_id'],
+      studentName: map['student_name'],
+      photoUrl: map['photo_url'],
+      description: map['description'] ?? '',
+      date: DateTime.parse(map['date']),
+      createdAt: DateTime.parse(map['created_at']),
+    );
+  }
+
+  Map<String, dynamic> toSupabase() {
+    return {
+      'student_id': studentId,
+      'student_name': studentName,
+      'photo_url': photoUrl,
+      'description': description,
+      'date': date.toIso8601String().split('T')[0],
+    };
+  }
+
   String toJson() => json.encode(toMap());
 
   factory Documentation.fromJson(String source) => Documentation.fromMap(json.decode(source));

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/student.dart';
-import '../utils/storage.dart';
+import '../services/supabase_service.dart';
 
 class StudentState {
   final List<Student> students;
@@ -32,29 +32,44 @@ class StudentNotifier extends StateNotifier<StudentState> {
   }
 
   Future<void> loadStudents() async {
-    state = state.copyWith(isLoading: true);
-    final students = await StorageService.getStudents();
-    state = StudentState(students: students);
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final students = await SupabaseService.getStudents();
+      state = StudentState(students: students);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: 'Gagal memuat data siswa');
+    }
   }
 
   Future<void> addStudent(Student student) async {
-    final updated = [...state.students, student];
-    await StorageService.saveStudents(updated);
-    state = state.copyWith(students: updated);
+    try {
+      final newStudent = await SupabaseService.addStudent(student);
+      state = state.copyWith(students: [newStudent, ...state.students]);
+    } catch (e) {
+      state = state.copyWith(error: 'Gagal menambah siswa');
+    }
   }
 
   Future<void> updateStudent(Student updatedStudent) async {
-    final updated = state.students.map((s) {
-      return s.id == updatedStudent.id ? updatedStudent : s;
-    }).toList();
-    await StorageService.saveStudents(updated);
-    state = state.copyWith(students: updated);
+    try {
+      final updated = await SupabaseService.updateStudent(updatedStudent);
+      final students = state.students.map((s) {
+        return s.id == updated.id ? updated : s;
+      }).toList();
+      state = state.copyWith(students: students);
+    } catch (e) {
+      state = state.copyWith(error: 'Gagal memperbarui siswa');
+    }
   }
 
   Future<void> deleteStudent(String id) async {
-    final updated = state.students.where((s) => s.id != id).toList();
-    await StorageService.saveStudents(updated);
-    state = state.copyWith(students: updated);
+    try {
+      await SupabaseService.deleteStudent(id);
+      final updated = state.students.where((s) => s.id != id).toList();
+      state = state.copyWith(students: updated);
+    } catch (e) {
+      state = state.copyWith(error: 'Gagal menghapus siswa');
+    }
   }
 
   List<Student> searchStudents(String query) {

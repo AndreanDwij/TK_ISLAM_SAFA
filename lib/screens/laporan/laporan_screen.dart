@@ -465,14 +465,19 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
       );
 
       final bytes = await pdf.save();
-      final dir = await getApplicationDocumentsDirectory();
+      final dir = await getExternalStorageDirectory();
+      final downloadDir = Directory('${dir!.path}/../../../../Download');
+      final resolvedDir = Directory(await downloadDir.resolveSymbolicLinks());
+      if (!await resolvedDir.exists()) {
+        await resolvedDir.create(recursive: true);
+      }
       final fileName = 'Laporan_${student.name}_$_selectedSemester'.replaceAll(' ', '_');
-      final file = File('${dir.path}/$fileName.pdf');
+      final file = File('${resolvedDir.path}/$fileName.pdf');
       await file.writeAsBytes(bytes);
 
       if (mounted) {
         Navigator.pop(context);
-        _showSuccessSnackBar('PDF berhasil disimpan: ${file.path}');
+        _showSuccessSnackBar('PDF disimpan di folder Download: $fileName.pdf');
       }
     } catch (e) {
       if (mounted) {

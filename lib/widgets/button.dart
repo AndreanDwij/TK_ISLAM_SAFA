@@ -70,10 +70,11 @@ class AppButton extends StatelessWidget {
         child: OutlinedButton(
           onPressed: enabled ? onPressed : null,
           style: OutlinedButton.styleFrom(
-            foregroundColor: enabled ? AppColors.primary : AppColors.grey,
+            foregroundColor: enabled ? AppColors.black : AppColors.grey,
+            backgroundColor: enabled ? AppColors.greyLight : Colors.transparent,
             side: BorderSide(
-              color: enabled ? AppColors.primary : AppColors.grey,
-              width: 1,
+              color: enabled ? AppColors.border : AppColors.grey,
+              width: 1.5,
             ),
             shape: RoundedRectangleBorder(
               borderRadius: AppRadius.button,

@@ -63,6 +63,40 @@ class Assessment {
     );
   }
 
+  factory Assessment.fromSupabase(Map<String, dynamic> map) {
+    return Assessment(
+      id: map['id'],
+      studentId: map['student_id'],
+      studentName: map['student_name'],
+      aspect: map['aspect'],
+      score: map['score'],
+      note: map['note'] ?? '',
+      photoUrls: map['photo_urls'] != null
+          ? List<String>.from(map['photo_urls'])
+          : [],
+      semester: map['semester'],
+      teacherId: map['teacher_id'],
+      teacherName: map['teacher_name'],
+      date: DateTime.parse(map['date']),
+      createdAt: DateTime.parse(map['created_at']),
+    );
+  }
+
+  Map<String, dynamic> toSupabase() {
+    return {
+      'student_id': studentId,
+      'student_name': studentName,
+      'aspect': aspect,
+      'score': score,
+      'note': note,
+      'photo_urls': photoUrls,
+      'semester': semester,
+      'teacher_id': teacherId,
+      'teacher_name': teacherName,
+      'date': date.toIso8601String().split('T')[0],
+    };
+  }
+
   String toJson() => json.encode(toMap());
 
   factory Assessment.fromJson(String source) => Assessment.fromMap(json.decode(source));

@@ -6,6 +6,7 @@ import '../widgets/bottom_nav.dart';
 import 'dashboard/dashboard_screen.dart';
 import 'siswa/siswa_list_screen.dart';
 import 'penilaian/penilaian_list_screen.dart';
+import 'dokumentasi/dokumentasi_screen.dart';
 import 'laporan/laporan_screen.dart';
 import 'profil/profil_screen.dart';
 import 'monitoring/monitoring_screen.dart';
@@ -72,6 +73,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               label: 'Siswa',
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.assessment_outlined),
+              activeIcon: Icon(Icons.assessment),
+              label: 'Penilaian',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.photo_library_outlined),
+              activeIcon: Icon(Icons.photo_library),
+              label: 'Dokumentasi',
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.description_outlined),
               activeIcon: Icon(Icons.description),
               label: 'Laporan',
@@ -117,6 +128,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         const DashboardScreen(),
         const SiswaListScreen(),
         const PenilaianListScreen(),
+        const DokumentasiScreen(),
         const LaporanScreen(),
         const ProfilScreen(),
       ];
@@ -124,6 +136,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   List<Widget> get _kepalaPages => [
         const MonitoringScreen(),
         const SiswaListScreen(),
+        const PenilaianListScreen(),
+        const DokumentasiScreen(),
         const LaporanScreen(),
         const ProfilScreen(),
       ];

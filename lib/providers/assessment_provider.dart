@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/assessment.dart';
-import '../utils/storage.dart';
+import '../services/supabase_service.dart';
 
 class AssessmentState {
   final List<Assessment> assessments;
@@ -32,29 +32,44 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
   }
 
   Future<void> loadAssessments() async {
-    state = state.copyWith(isLoading: true);
-    final assessments = await StorageService.getAssessments();
-    state = AssessmentState(assessments: assessments);
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final assessments = await SupabaseService.getAssessments();
+      state = AssessmentState(assessments: assessments);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: 'Gagal memuat penilaian');
+    }
   }
 
   Future<void> addAssessment(Assessment assessment) async {
-    final updated = [...state.assessments, assessment];
-    await StorageService.saveAssessments(updated);
-    state = state.copyWith(assessments: updated);
+    try {
+      final newAssessment = await SupabaseService.addAssessment(assessment);
+      state = state.copyWith(assessments: [newAssessment, ...state.assessments]);
+    } catch (e) {
+      state = state.copyWith(error: 'Gagal menambah penilaian');
+    }
   }
 
   Future<void> updateAssessment(Assessment updatedAssessment) async {
-    final updated = state.assessments.map((a) {
-      return a.id == updatedAssessment.id ? updatedAssessment : a;
-    }).toList();
-    await StorageService.saveAssessments(updated);
-    state = state.copyWith(assessments: updated);
+    try {
+      final updated = await SupabaseService.updateAssessment(updatedAssessment);
+      final assessments = state.assessments.map((a) {
+        return a.id == updated.id ? updated : a;
+      }).toList();
+      state = state.copyWith(assessments: assessments);
+    } catch (e) {
+      state = state.copyWith(error: 'Gagal memperbarui penilaian');
+    }
   }
 
   Future<void> deleteAssessment(String id) async {
-    final updated = state.assessments.where((a) => a.id != id).toList();
-    await StorageService.saveAssessments(updated);
-    state = state.copyWith(assessments: updated);
+    try {
+      await SupabaseService.deleteAssessment(id);
+      final updated = state.assessments.where((a) => a.id != id).toList();
+      state = state.copyWith(assessments: updated);
+    } catch (e) {
+      state = state.copyWith(error: 'Gagal menghapus penilaian');
+    }
   }
 
   List<Assessment> getByStudent(String studentId) {
