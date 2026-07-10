@@ -27,9 +27,31 @@ class OrangTuaDashboard extends ConsumerWidget {
     final assessmentState = ref.watch(assessmentProvider);
 
     final childId = authState.user?.childId;
-    if (childId == null || studentState.students.isEmpty) {
-      return const SizedBox.shrink();
+
+    if (studentState.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.primary,
+        ),
+      );
     }
+
+    if (childId == null) {
+      return const AppEmptyState(
+        message: 'Belum Terhubung dengan Siswa',
+        description: 'Hubungi admin/guru untuk menghubungkan akun Orang Tua Anda dengan anak Anda di sistem.',
+        icon: Icons.person_off_outlined,
+      );
+    }
+
+    if (studentState.students.isEmpty) {
+      return const AppEmptyState(
+        message: 'Tidak Ada Data Siswa',
+        description: 'Data siswa belum tersedia atau gagal dimuat di dalam sistem.',
+        icon: Icons.people_outline,
+      );
+    }
+
     final child = studentState.students.firstWhere(
       (s) => s.id == childId,
       orElse: () => Student(
@@ -38,6 +60,14 @@ class OrangTuaDashboard extends ConsumerWidget {
         parentPhone: '', createdAt: DateTime.now(),
       ),
     );
+
+    if (child.id.isEmpty) {
+      return const AppEmptyState(
+        message: 'Siswa Tidak Ditemukan',
+        description: 'Akun Anda terhubung dengan ID siswa yang tidak terdaftar di sistem.',
+        icon: Icons.warning_amber_rounded,
+      );
+    }
 
     final childAssessments = assessmentState.assessments
         .where((a) => a.studentId == childId)
