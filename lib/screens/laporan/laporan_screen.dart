@@ -47,11 +47,70 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
     final studentState = ref.watch(studentProvider);
     final assessmentState = ref.watch(assessmentProvider);
     final isOrangTua = authState.user?.role == UserRole.orangTua;
+    final childId = authState.user?.childId;
+
+    if (isOrangTua && childId == null) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFF97316), Color(0xFFF59E0B)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(24),
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              child: SafeArea(
+                bottom: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+                          onPressed: () => Navigator.maybePop(context),
+                        ),
+                        const Expanded(
+                          child: Text(
+                            'Laporan',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(width: 48),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const Expanded(
+              child: AppEmptyState(
+                message: 'Belum Terhubung dengan Siswa',
+                description: 'Hubungi admin/guru untuk menghubungkan akun Orang Tua Anda dengan anak Anda di sistem.',
+                icon: Icons.person_off_outlined,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     List<Student> students = studentState.students;
 
     if (isOrangTua) {
-      final childId = authState.user?.childId;
       students = students.where((s) => s.id == childId).toList();
       _selectedStudentId ??= childId;
     }

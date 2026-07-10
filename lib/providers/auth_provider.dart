@@ -113,6 +113,51 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<bool> register({
+    required String name,
+    required String email,
+    required String password,
+    required UserRole role,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final response = await SupabaseService.signUp(
+        email: email,
+        password: password,
+        name: name,
+        role: role.index,
+      );
+
+      if (response.user != null) {
+        // Sign out after registration so user can login manually
+        await SupabaseService.signOut();
+        state = state.copyWith(isLoading: false);
+        return true;
+      }
+
+      state = state.copyWith(isLoading: false, error: 'Gagal membuat akun');
+      return false;
+    } catch (e) {
+      String errorMessage = 'Gagal membuat akun';
+      final errorStr = e.toString().toLowerCase();
+      if (errorStr.contains('user already registered') ||
+          errorStr.contains('already been registered')) {
+        errorMessage = 'Email sudah terdaftar';
+      } else if (errorStr.contains('invalid email')) {
+        errorMessage = 'Format email tidak valid';
+      } else if (errorStr.contains('weak password') ||
+          errorStr.contains('password')) {
+        errorMessage = 'Password terlalu lemah, minimal 8 karakter';
+      } else if (errorStr.contains('too many requests') ||
+          errorStr.contains('rate limit')) {
+        errorMessage = 'Terlalu banyak percobaan, coba lagi nanti';
+      }
+      state = state.copyWith(isLoading: false, error: errorMessage);
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     try {
       await SupabaseService.signOut();

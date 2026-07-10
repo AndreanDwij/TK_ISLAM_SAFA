@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../screens/splash/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
+import '../screens/auth/register_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/siswa/siswa_list_screen.dart';
 import '../screens/siswa/siswa_detail_screen.dart';
@@ -23,7 +24,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final authState = ref.read(authProvider);
       final isLoggedIn = authState.isLoggedIn;
       final location = state.matchedLocation;
-      final isPublicRoute = location == '/login' || location == '/splash';
+      final isPublicRoute = location == '/login' || location == '/splash' || location == '/register';
 
       if (!isLoggedIn && !isPublicRoute) {
         return '/login';
@@ -43,6 +44,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: '/dashboard',
