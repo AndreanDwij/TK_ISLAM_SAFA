@@ -114,7 +114,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.primary.withOpacity(0.16),
+                    AppColors.primary.withValues(alpha: 0.16),
                     Colors.transparent,
                   ],
                 ),
@@ -133,7 +133,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.secondary.withOpacity(0.14),
+                    AppColors.secondary.withValues(alpha: 0.14),
                     Colors.transparent,
                   ],
                 ),
@@ -255,7 +255,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             borderRadius: BorderRadius.circular(36),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withOpacity(0.08),
+                                color: AppColors.primary.withValues(alpha: 0.08),
                                 blurRadius: 24,
                                 offset: const Offset(0, 12),
                               ),
@@ -310,8 +310,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             return CircularProgressIndicator(
                               strokeWidth: 3,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.primary.withOpacity(
-                                  0.6 + _pulseController.value * 0.4,
+                                AppColors.primary.withValues(
+                                  alpha: 0.6 + _pulseController.value * 0.4,
                                 ),
                               ),
                             );

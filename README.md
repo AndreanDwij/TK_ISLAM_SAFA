@@ -14,7 +14,11 @@ Sistem Informasi Penilaian dan Administrasi Siswa TK Islam Safa.
 
 ```bash
 # Clone repository
-cd tk_safa_app
+git clone <repository_url>
+cd TK_ISLAM_SAFA
+
+# Masuk ke folder frontend
+cd frontend
 
 # Install dependencies
 flutter pub get
@@ -26,6 +30,9 @@ flutter run
 ## Running the Application
 
 ```bash
+# Masuk ke folder frontend terlebih dahulu
+cd frontend
+
 # Jalankan di device/emulator
 flutter run
 
@@ -76,7 +83,7 @@ flutter build ios
 
 ## Testing the Application
 
-1. Jalankan aplikasi dengan `flutter run`
+1. Masuk ke folder `frontend` dan jalankan aplikasi dengan `flutter run`
 2. Login dengan salah satu akun di atas
 3. Navigasi menggunakan Bottom Navigation
 4. Test setiap fitur sesuai role yang dipilih
@@ -156,75 +163,82 @@ await prefs.clear();
 ## Project Structure
 
 ```
-tk_safa_app/
-├── lib/
-│   ├── main.dart                    # Entry point
-│   ├── app/
-│   │   ├── app.dart                 # App widget
-│   │   └── routes.dart              # Route configuration
-│   ├── config/
-│   │   ├── colors.dart              # Color palette
-│   │   ├── typography.dart          # Typography styles
-│   │   ├── theme.dart               # App theme
-│   │   ├── spacing.dart             # Spacing system
-│   │   ├── radius.dart              # Border radius
-│   │   └── shadows.dart             # Box shadows
-│   ├── models/
-│   │   ├── user.dart                # User model
-│   │   ├── student.dart             # Student model
-│   │   ├── assessment.dart          # Assessment model
-│   │   └── documentation.dart       # Documentation model
-│   ├── providers/
-│   │   ├── auth_provider.dart       # Authentication state
-│   │   ├── student_provider.dart    # Student state
-│   │   ├── assessment_provider.dart # Assessment state
-│   │   └── documentation_provider.dart
-│   ├── screens/
-│   │   ├── splash/splash_screen.dart
-│   │   ├── auth/login_screen.dart
-│   │   ├── dashboard/
-│   │   │   ├── dashboard_screen.dart
-│   │   │   ├── guru_dashboard.dart
-│   │   │   ├── kepala_dashboard.dart
-│   │   │   └── orang_tua_dashboard.dart
-│   │   ├── siswa/
-│   │   │   ├── siswa_list_screen.dart
-│   │   │   ├── siswa_detail_screen.dart
-│   │   │   └── siswa_form_screen.dart
-│   │   ├── penilaian/
-│   │   │   ├── penilaian_list_screen.dart
-│   │   │   └── penilaian_form_screen.dart
-│   │   ├── dokumentasi/dokumentasi_screen.dart
-│   │   ├── laporan/laporan_screen.dart
-│   │   ├── monitoring/monitoring_screen.dart
-│   │   └── profil/
-│   │       ├── profil_screen.dart
-│   │       ├── edit_profil_screen.dart
-│   │       └── ganti_password_screen.dart
-│   ├── utils/
-│   │   ├── storage.dart             # SharedPreferences helper
-│   │   └── validators.dart          # Form validators
-│   └── widgets/
-│       ├── app_bar.dart
-│       ├── bottom_nav.dart
-│       ├── button.dart
-│       ├── card.dart
-│       ├── chart_bar.dart
-│       ├── dialog.dart
-│       ├── dropdown.dart
-│       ├── empty_state.dart
-│       ├── error_state.dart
-│       ├── filter_chip.dart
-│       ├── list_item.dart
-│       ├── loading.dart
-│       ├── search_bar.dart
-│       ├── snackbar.dart
-│       ├── stat_card.dart
-│       └── text_field.dart
-├── pubspec.yaml
-├── analysis_options.yaml
-├── README.md
-└── IMPLEMENTATION_NOTES.md
+TK_ISLAM_SAFA/
+├── backend/                         # Backend Configurations & Migrations
+│   └── supabase/                    # Supabase backend folder
+│       └── migrations/              # Database migration SQL files
+├── frontend/                        # Frontend Flutter Application
+│   ├── lib/                         # Flutter source files
+│   │   ├── main.dart                # Entry point
+│   │   ├── app/
+│   │   │   ├── app.dart             # App widget
+│   │   │   └── routes.dart          # Route configuration
+│   │   ├── config/
+│   │   │   ├── colors.dart          # Color palette
+│   │   │   ├── typography.dart      # Typography styles
+│   │   │   ├── theme.dart           # App theme
+│   │   │   ├── spacing.dart         # Spacing system
+│   │   │   ├── radius.dart          # Border radius
+│   │   │   └── shadows.dart         # Box shadows
+│   │   ├── models/
+│   │   │   ├── user.dart            # User model
+│   │   │   ├── student.dart         # Student model
+│   │   │   ├── assessment.dart      # Assessment model
+│   │   │   └── documentation.dart   # Documentation model
+│   │   ├── providers/
+│   │   │   ├── auth_provider.dart   # Authentication state
+│   │   │   ├── student_provider.dart # Student state
+│   │   │   ├── assessment_provider.dart # Assessment state
+│   │   │   └── documentation_provider.dart
+│   │   ├── screens/
+│   │   │   ├── splash/splash_screen.dart
+│   │   │   ├── auth/login_screen.dart
+│   │   │   ├── dashboard/
+│   │   │   │   ├── dashboard_screen.dart
+│   │   │   │   ├── guru_dashboard.dart
+│   │   │   │   ├── kepala_dashboard.dart
+│   │   │   │   └── orang_tua_dashboard.dart
+│   │   │   ├── siswa/
+│   │   │   │   ├── siswa_list_screen.dart
+│   │   │   │   ├── siswa_detail_screen.dart
+│   │   │   │   └── siswa_form_screen.dart
+│   │   │   ├── penilaian/
+│   │   │   │   ├── penilaian_list_screen.dart
+│   │   │   │   └── penilaian_form_screen.dart
+│   │   │   ├── dokumentasi/dokumentasi_screen.dart
+│   │   │   ├── laporan/laporan_screen.dart
+│   │   │   ├── monitoring/monitoring_screen.dart
+│   │   │   └── profil/
+│   │   │       ├── profil_screen.dart
+│   │   │       ├── edit_profil_screen.dart
+│   │   │       └── ganti_password_screen.dart
+│   │   ├── utils/
+│   │   │   ├── storage.dart         # SharedPreferences helper
+│   │   │   └── validators.dart      # Form validators
+│   │   └── widgets/
+│   │       ├── app_bar.dart
+│   │       ├── bottom_nav.dart
+│   │       ├── button.dart
+│   │       ├── card.dart
+│   │       ├── chart_bar.dart
+│   │       ├── dialog.dart
+│   │       ├── dropdown.dart
+│   │       ├── empty_state.dart
+│   │       ├── error_state.dart
+│   │       ├── filter_chip.dart
+│   │       ├── list_item.dart
+│   │       ├── loading.dart
+│   │       ├── search_bar.dart
+│   │       ├── snackbar.dart
+│   │       ├── stat_card.dart
+│   │       └── text_field.dart
+│   ├── assets/                      # Application assets (images, fonts, logo)
+│   ├── pubspec.yaml                 # Pubspec configuration file
+│   ├── .env                         # Local env file (copied here)
+│   └── analysis_options.yaml        # Flutter linter rules
+├── SOT/                             # Specifications & Userflows documentation
+├── README.md                        # Project root documentation
+└── IMPLEMENTATION_NOTES.md          # Global developer notes
 ```
 
 ## Dummy Data

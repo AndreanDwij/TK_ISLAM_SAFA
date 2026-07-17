@@ -107,8 +107,8 @@ class _SiswaListScreenState extends ConsumerState<SiswaListScreen> {
                       style: TextStyle(color: AppColors.textPrimary),
                       decoration: InputDecoration(
                         hintText: 'Cari siswa...',
-                        hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.7)),
-                        prefixIcon: Icon(Icons.search, color: AppColors.textSecondary.withOpacity(0.8)),
+                        hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.7)),
+                        prefixIcon: Icon(Icons.search, color: AppColors.textSecondary.withValues(alpha: 0.8)),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       ),
