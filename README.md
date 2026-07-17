@@ -135,11 +135,11 @@ Kami adalah mahasiswa Semester 4 program studi Sistem Informasi yang mengembangk
 
 | Nama Anggota | NIM | Peran Utama |
 |---|---|---|
-| **Andrean Dwi Julyan** | 2400016026 | Project Leader & Backend Integrator |
-| **Bahaudin Gutsantowi** | 2400016008 | UI Designer & Frontend Developer |
-| **Muhammad Zidan Awwalu Naja** | 2400016010 | Database Designer & QA Engineer |
-| **Aldi Mustarih** | 2400016055 | System Analyst & Documenter |
-| **Abil Sabilillah** | 2400016077 | UI/UX Researcher & Technical Writer |
+| **Andrean Dwi Julyan** | 2400016026 | Project Leader & UI Designer |
+| **Bahaudin Gutsantowi** | 2400016008 | Backend Integrator & Database Designer |
+| **Muhammad Zidan Awwalu Naja** | 2400016010 | Frontend Developer & QA Engineer |
+| **Aldi Mustarih** | 2400016055 | System Analyst & Requirements |
+| **Abil Sabilillah** | 2400016077 | UI/UX Researcher & Documenter |
 
 ---
 
